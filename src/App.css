@@ -1,34 +1,156 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
 h1 {
   font-size: 24px;
-  margin-bottom: 10px;
   text-align: center;
-  background-color: #cfcfcf;
-  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.button-container button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.table-container {
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
 }
 
 thead th {
-  background-color: #9c9c9c;
-  border: 1px solid #ffffff;
-  padding: 10px;
+  background-color: #4caf50;
+  color: white;
   font-weight: bold;
+  padding: 12px 8px;
   text-align: left;
 }
 
 tbody td {
-  border: 5px solid #858383;
-  padding: 10px;
+  padding: 12px 8px;
+  border: 1px solid #4caf50;
 }
 
 tbody tr:nth-child(even) {
-  background-color: #d7d7df;
+  background-color: #f2f2f2;
 }
 
 tbody tr:hover {
-  background-color: #adadad;
+  background-color: #e0e0e0;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 5px;
+  width: 400px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.popup-content h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.popup-content form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.popup-content form input,
+.popup-content form select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+  margin-top: 5px;
+}
+
+.popup-content form button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.popup-content form button[type="button"] {
+  background-color: #ff5252;
+  margin-left: 10px;
+}
+
+.popup-content form button[type="submit"] {
+  background-color: #2196f3;
+}
+
+.popup-content form button:hover {
+  opacity: 0.8;
+}
+
+.error-message {
+  margin-bottom: 20px;
+  border: 3px solid red;
+  padding: 10px;
+  color: red;
+  font-weight: bold;
+}
+
+.error-message::after {
+  content: attr(data-time-left);
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  color: #999;
+  font-size: 12px;
+}
+
+.timer-error-message{
+  margin-left: 100px;
+}
+
+.success-message{
+  display: flex;
+  justify-content: center;
+  font-size: larger;
 }

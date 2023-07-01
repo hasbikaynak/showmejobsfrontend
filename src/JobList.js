@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 function JobList() {
   const [jobs, setJobs] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [jobData, setJobData] = useState({
     role: '',
     seniority: null,
@@ -12,10 +14,21 @@ function JobList() {
     city: '',
     workType: null,
   });
+  const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => {
+        setTimeLeft((prevTime) => prevTime - 1);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeft]);
 
   async function fetchJobs() {
     try {
@@ -27,7 +40,8 @@ function JobList() {
     }
   }
 
-  async function addJob() {
+  async function addJob(event) {
+    event.preventDefault();
     try {
       const response = await fetch('http://localhost:8080/api/v1/job', {
         method: 'POST',
@@ -36,21 +50,33 @@ function JobList() {
         },
         body: JSON.stringify(jobData),
       });
-      const data = await response.json();
-      console.log('Job added:', data);
-      fetchJobs();
-      setShowPopup(false);
-      setJobData({
-        role: '',
-        seniority: null,
-        companyName: '',
-        date: new Date().toISOString(),
-        salary: 0,
-        city: '',
-        workType: null,
-      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Job added:', data);
+        setSuccessMessage('Job added successfully');
+        fetchJobs();
+        setShowPopup(false);
+        setJobData({
+          role: '',
+          seniority: null,
+          companyName: '',
+          date: new Date().toISOString(),
+          salary: 0,
+          city: '',
+          workType: null,
+        });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
     } catch (error) {
       console.error('Error adding job:', error);
+      setErrorMessage(error.message || 'An error occurred while adding the job.');
+      setTimeLeft(10);
+      setTimeout(() => {
+        setErrorMessage('');
+        setTimeLeft(0);
+      }, 10000);
     }
   }
 
@@ -62,10 +88,41 @@ function JobList() {
     }));
   }
 
+  async function deleteJob(jobId) {
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/job/${jobId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        console.log('Job deleted successfully');
+        setSuccessMessage('Job deleted successfully');
+        fetchJobs();
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      setErrorMessage(
+        error.message || 'An error occurred while deleting the job.'
+      );
+      setTimeLeft(10);
+      setTimeout(() => {
+        setErrorMessage('');
+        setTimeLeft(0);
+      }, 10000);
+    }
+  }
+
   return (
     <div>
       <h1>Job List</h1>
-      <button onClick={() => setShowPopup(true)}>Add Job</button>
+      <div className="button-container">
+        <button onClick={() => setShowPopup(true)}>Add Job</button>
+      </div>
+        <div className='success-message'>
+          {successMessage}
+        </div>
       <table>
         <thead>
           <tr>
@@ -77,75 +134,141 @@ function JobList() {
             <th>Salary</th>
             <th>Seniority</th>
             <th>Work Type</th>
+            <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          {jobs.map((job) => (
-            <tr key={job.id}>
-              <td>{job.id}</td>
-              <td>{job.role}</td>
-              <td>{job.city}</td>
-              <td>{job.companyName}</td>
-              <td>{new Date(job.date).toLocaleDateString()} {new Date(job.date).toLocaleTimeString()}</td>
-              <td>{job.salary}</td>
-              <td>{job.seniority}</td>
-              <td>{job.workType}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-{showPopup && (
-  <div className="popup">
-    <div className="popup-content">
-      <h2>Add Job</h2>
-      <form onSubmit={addJob}>
-        <label>
-          Role:
-          <input type="text" name="role" value={jobData.role} onChange={handleInputChange} required />
-        </label>
-        <label>
-          Seniority:
-          <select name="seniority" value={jobData.seniority} onChange={handleInputChange} required>
-            <option value="">Select Seniority</option>
-            <option value="INTERN">Intern</option>
-            <option value="JUNIOR">Junior</option>
-            <option value="MID">Mid Level</option>
-            <option value="SENIOR">Senior</option>
-          </select>
-        </label>
-        <label>
-          Company Name:
-          <input type="text" name="companyName" value={jobData.companyName} onChange={handleInputChange} required />
-        </label>
-        <label>
-          Date:
-          <input type="datetime-local" name="date" value={jobData.date} onChange={handleInputChange} required />
-        </label>
-        <label>
-          Salary:
-          <input type="number" name="salary" value={jobData.salary} onChange={handleInputChange} required />
-        </label>
-        <label>
-          City:
-          <input type="text" name="city" value={jobData.city} onChange={handleInputChange} required />
-        </label>
-        <label>
-          Work Type:
-          <select name="workType" value={jobData.workType} onChange={handleInputChange} required>
-            <option value="">Select Work Type</option>
-            <option value="HYBRID">Hybrid</option>
-            <option value="REMOTE">Remote</option>
-            <option value="ONSITE">Onsite</option>
-          </select>
-        </label>
-        <button type="submit">Save</button>
-        <button type="button" onClick={() => setShowPopup(false)}>Cancel</button>
-      </form>
-    </div>
-  </div>
+        {Array.isArray(jobs) && jobs.length > 0 ? (
+  <tbody>
+    {jobs.map((job) => (
+      <tr key={job.id}>
+        <td>{job.id}</td>
+        <td>{job.role}</td>
+        <td>{job.city}</td>
+        <td>{job.companyName}</td>
+        <td>
+          {new Date(job.date).toLocaleDateString()}{' '}
+          {new Date(job.date).toLocaleTimeString()}
+        </td>
+        <td>{job.salary}</td>
+        <td>{job.seniority}</td>
+        <td>{job.workType}</td>
+        <td>
+          <button
+            style={{ backgroundColor: "red" }}
+            onClick={() => deleteJob(job.id)}
+          >
+            Delete
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+) : (
+  <tbody >
+    <tr>
+      <td colSpan="9"  style={{ textAlign: 'center' }}>No jobs found.</td>
+    </tr>
+  </tbody>
 )}
-
+      </table>
+      {showPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <h2>Add Job</h2>
+            {errorMessage && (
+              <div className="error-message">
+                {errorMessage}
+                <span className='timer-error-message'>{timeLeft > 0 && timeLeft}s</span>
+              </div>
+            )}
+            <form onSubmit={addJob}>
+              <label>
+                Role:
+                <input
+                  type="text"
+                  name="role"
+                  value={jobData.role}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+              <label>
+                Seniority:
+                <select
+                  name="seniority"
+                  value={jobData.seniority}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Seniority</option>
+                  <option value="INTERN">Intern</option>
+                  <option value="JUNIOR">Junior</option>
+                  <option value="MID">Mid Level</option>
+                  <option value="SENIOR">Senior</option>
+                </select>
+              </label>
+              <label>
+                Company Name:
+                <input
+                  type="text"
+                  name="companyName"
+                  value={jobData.companyName}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+              <label>
+                Date:
+                <input
+                  type="datetime-local"
+                  name="date"
+                  value={jobData.date}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+              <label>
+                Salary:
+                <input
+                  type="number"
+                  name="salary"
+                  value={jobData.salary}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+              <label>
+                City:
+                <input
+                  type="text"
+                  name="city"
+                  value={jobData.city}
+                  onChange={handleInputChange}
+                  required
+                />
+              </label>
+              <label>
+                Work Type:
+                <select
+                  name="workType"
+                  value={jobData.workType}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select Work Type</option>
+                  <option value="HYBRID">Hybrid</option>
+                  <option value="REMOTE">Remote</option>
+                  <option value="ONSITE">Onsite</option>
+                </select>
+              </label>
+              <button type="submit">Save</button>
+              <button type="button" onClick={() => setShowPopup(false)}>
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
