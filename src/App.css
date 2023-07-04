@@ -115,6 +115,26 @@ tbody tr:hover {
   cursor: pointer;
 }
 
+.update-button{
+  margin-left: 10px;
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.delete-button{
+  margin-left: 10px;
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
 .popup-content form button[type="button"] {
   background-color: #ff5252;
   margin-left: 10px;
@@ -150,6 +170,7 @@ tbody tr:hover {
 }
 
 .success-message{
+  margin: 20px;
   display: flex;
   justify-content: center;
   font-size: larger;

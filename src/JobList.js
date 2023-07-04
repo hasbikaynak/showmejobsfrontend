@@ -5,6 +5,7 @@ function JobList() {
   const [showPopup, setShowPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [jobToUpdate, setJobToUpdate] = useState(null);
   const [jobData, setJobData] = useState({
     role: '',
     seniority: null,
@@ -114,15 +115,70 @@ function JobList() {
     }
   }
 
+  const updateJob = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await fetch(`http://localhost:8080/api/v1/job/${jobToUpdate.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jobData),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Job updated:', data);
+        setSuccessMessage('Job updated successfully');
+        fetchJobs();
+        setShowPopup(false);
+        setJobData({
+          role: '',
+          seniority: null,
+          companyName: '',
+          date: new Date().toISOString(),
+          salary: 0,
+          city: '',
+          workType: null,
+        });
+        setJobToUpdate(null);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+    } catch (error) {
+      console.error('Error updating job:', error);
+      setErrorMessage(error.message || 'An error occurred while updating the job.');
+      setTimeLeft(10);
+      setTimeout(() => {
+        setErrorMessage('');
+        setTimeLeft(0);
+      }, 10000);
+    }
+  };
+
+  const handleUpdateClick = (job) => {
+    setJobData({
+      role: job.role,
+      seniority: job.seniority,
+      companyName: job.companyName,
+      date: job.date,
+      salary: job.salary,
+      city: job.city,
+      workType: job.workType,
+    });
+    setJobToUpdate(job);
+    setShowPopup(true);
+  };
+
   return (
     <div>
       <h1>Job List</h1>
       <div className="button-container">
         <button onClick={() => setShowPopup(true)}>Add Job</button>
       </div>
-        <div className='success-message'>
-          {successMessage}
-        </div>
+      <div className='success-message'>
+              {successMessage}
+            </div>
       <table>
         <thead>
           <tr>
@@ -153,12 +209,12 @@ function JobList() {
         <td>{job.seniority}</td>
         <td>{job.workType}</td>
         <td>
-          <button
-            style={{ backgroundColor: "red" }}
+          <button className='delete-button'
             onClick={() => deleteJob(job.id)}
           >
             Delete
           </button>
+          <button className='update-button' onClick={() => handleUpdateClick(job)}>Update</button>
         </td>
       </tr>
     ))}
@@ -174,14 +230,14 @@ function JobList() {
       {showPopup && (
         <div className="popup">
           <div className="popup-content">
-            <h2>Add Job</h2>
+            <h2>{jobToUpdate ? 'Update Job' : 'Add Job'}</h2>
             {errorMessage && (
               <div className="error-message">
                 {errorMessage}
                 <span className='timer-error-message'>{timeLeft > 0 && timeLeft}s</span>
               </div>
             )}
-            <form onSubmit={addJob}>
+            <form onSubmit={jobToUpdate ? updateJob : addJob}>
               <label>
                 Role:
                 <input
@@ -261,7 +317,7 @@ function JobList() {
                   <option value="ONSITE">Onsite</option>
                 </select>
               </label>
-              <button type="submit">Save</button>
+              <button type="submit">{jobToUpdate ? 'Update' : 'Save'}</button>
               <button type="button" onClick={() => setShowPopup(false)}>
                 Cancel
               </button>
