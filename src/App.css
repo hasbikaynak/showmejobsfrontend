@@ -118,7 +118,7 @@ tbody tr:hover {
 .update-button{
   margin: 10px -10px 10px 10px;
   padding: 8px 16px;
-  background-color: #4caf50;
+  background-color: #4c77af;
   color: #ffffff;
   border: none;
   border-radius: 3px;
@@ -128,7 +128,7 @@ tbody tr:hover {
 .delete-button{
   margin: 10px -10px 10px 10px;
   padding: 8px 16px;
-  background-color: #4caf50;
+  background-color: #af4c4c;
   color: #ffffff;
   border: none;
   border-radius: 3px;
