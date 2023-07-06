@@ -22,7 +22,7 @@ h1 {
 .button-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: -10px;
 }
 
 .button-container button {
@@ -116,7 +116,7 @@ tbody tr:hover {
 }
 
 .update-button{
-  margin-left: 10px;
+  margin: 10px -10px 10px 10px;
   padding: 8px 16px;
   background-color: #4caf50;
   color: #ffffff;
@@ -126,7 +126,7 @@ tbody tr:hover {
 }
 
 .delete-button{
-  margin-left: 10px;
+  margin: 10px -10px 10px 10px;
   padding: 8px 16px;
   background-color: #4caf50;
   color: #ffffff;
